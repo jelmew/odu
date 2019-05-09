@@ -110,7 +110,7 @@ void print_file_size_formatted(const file_size_in_bytes size_in_bytes, const fil
 
 
 std::vector<std::string> getSubPaths(const filename &file_path) {
-    std::vector<std::__cxx11::string> file_path_splitted;
+    std::vector<std::string> file_path_splitted;
     boost::algorithm::split(file_path_splitted, file_path, [](char c) {
         return c == fs::path::preferred_separator;
     });
