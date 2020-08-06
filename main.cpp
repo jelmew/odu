@@ -27,16 +27,27 @@ file_size_in_bytes getSize(const decltype(fs::current_path()) &path) {
     return static_cast<file_size_in_bytes>(statbuf.st_blocks * 512);
 }
 
-bool sort_by_file_size_in_bytes_second_field_of_pair(const file_size_pair &a,
-                                                     const file_size_pair &b) {
+bool sort_by_file_size_in_bytes_second_field_of_pair_descending(const file_size_pair &a,
+                                                                const file_size_pair &b) {
     return (a.second > b.second);
 
 }
+bool sort_by_file_size_in_bytes_second_field_of_pair_ascending(const file_size_pair &a,
+                                                                const file_size_pair &b) {
+    return a.second < b.second;
 
+}
 std::vector<file_size_pair> get_vector_sorted_by_file_size_descending(
         std::vector<std::pair<std::string, file_size_in_bytes>> &unsortedVector) {
     sort(unsortedVector.begin(), unsortedVector.end(),
-         sort_by_file_size_in_bytes_second_field_of_pair);
+         sort_by_file_size_in_bytes_second_field_of_pair_descending);
+    return unsortedVector;
+}
+
+std::vector<file_size_pair> get_vector_sorted_by_file_size_ascending(
+        std::vector<std::pair<std::string, file_size_in_bytes>> &unsortedVector) {
+    sort(unsortedVector.begin(), unsortedVector.end(),
+         sort_by_file_size_in_bytes_second_field_of_pair_ascending);
     return unsortedVector;
 }
 
@@ -73,9 +84,14 @@ std::vector<file_size_pair> getAllInDirectory() {
     return list_of_directory;
 }
 
-void printSizeTree(std::vector<file_size_pair> vector) {
-    const std::vector<file_size_pair> sortedVector = get_vector_sorted_by_file_size_descending(
-            vector);
+void printSizeTree(std::vector<file_size_pair> vector, bool descending = true) {
+     std::vector<file_size_pair> sortedVector;
+    if (descending) {
+        sortedVector = get_vector_sorted_by_file_size_descending(
+                vector);
+    } else{
+        sortedVector = get_vector_sorted_by_file_size_ascending(vector);
+    }
     for (const file_size_pair &sorted_pair: sortedVector) {
         print_file_size_formatted(sorted_pair.second, sorted_pair.first);
     }
@@ -118,9 +134,13 @@ std::vector<std::string> getSubPaths(const filename &file_path) {
 }
 
 
-int main() {
+int main(int argc, char **argv) {
     auto list_of_pairs = getAllInDirectory();
-    printSizeTree(list_of_pairs);
+    if (argc == 1) {
+        printSizeTree(list_of_pairs);
+    } else if (strcmp(argv[1], "-i") == 0) {
+        printSizeTree(list_of_pairs, false);
+    }
     return 0;
 }
 
