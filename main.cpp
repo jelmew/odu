@@ -52,6 +52,9 @@ std::vector<file_size_pair> get_vector_sorted_by_file_size_ascending(
 }
 
 file_size_in_bytes getSizeForDirectory(const decltype(fs::current_path()) &path) {
+    if(fs::is_symlink(path)){
+        return 0;
+    }
     file_size_in_bytes file_size_in_bytes1{0};
     for (const auto &p: fs::directory_iterator(path)) {
         if (fs::is_regular_file(p)) {
@@ -60,7 +63,11 @@ file_size_in_bytes getSizeForDirectory(const decltype(fs::current_path()) &path)
             if (fs::is_symlink(p)) {
                 continue;
             }
-            file_size_in_bytes1 += getSizeForDirectory(p.path());
+            try {
+                file_size_in_bytes1 += getSizeForDirectory(p.path());
+            } catch (fs::filesystem_error& error ) {
+               return 0;
+            }
         }
     }
     return file_size_in_bytes1;
